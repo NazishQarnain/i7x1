@@ -469,6 +469,13 @@
         if (!confirm("Delete this post?")) return;
         try {
           await db.collection("posts").doc(postId).delete();
+          // Bug fix: this used to call loadPostsForAdmin() without
+          // resetting pagination.stack first. If you deleted a post
+          // while on page 2+, it silently reloaded page 1's data but
+          // left the "Prev" button enabled (using the stale stack from
+          // before) — clicking it did nothing useful. Reset state so
+          // the pagination buttons match what's actually on screen.
+          resetPagination();
           loadPostsForAdmin();
         } catch (e) {
           console.error("Delete post error:", e);
@@ -696,6 +703,16 @@
           applyDateFilterBtn.addEventListener("click", () => {
             const startVal = filterStartInput.value;
             const endVal = filterEndInput.value;
+
+            // Bug fix: if the end date was before the start date, the
+            // Firestore range query would just silently return zero
+            // results ("No posts found") with no explanation — looked
+            // like a broken filter or an empty database. Catch it and
+            // tell the admin what actually went wrong.
+            if (startVal && endVal && endVal < startVal) {
+              alert("End date can't be before start date.");
+              return;
+            }
 
             currentFilter.start = startVal
               ? firebase.firestore.Timestamp.fromDate(

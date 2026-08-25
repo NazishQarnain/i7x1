@@ -315,6 +315,17 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    // Bug fix: there was no limit on the selected file's size before
+    // handing it to canvas-based compression — a very large image
+    // (e.g. 40MB raw photo) could freeze the tab for several seconds
+    // while the browser decodes/draws it. Reject oversized files early
+    // with a clear message instead.
+    const MAX_IMAGE_MB = 20;
+    if (file && file.size > MAX_IMAGE_MB * 1024 * 1024) {
+      showAlert(`Image is too large. Please choose a file under ${MAX_IMAGE_MB}MB.`);
+      return;
+    }
+
     // Bug fix: postBtn had no disabled state, so clicking it twice while
     // the (potentially slow) image upload + geolocation lookup was still
     // running created two duplicate posts.
@@ -429,8 +440,32 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
           }
 
-          snap.forEach((doc) => {
+          // Bug fix: this button is literally called "Load nearby news"
+          // and computes a distance for every post, but never actually
+          // sorted by that distance — it just showed the 50 most recent
+          // posts in whatever order Firestore returned them, regardless
+          // of how far away they were. Sorting nearest-first here
+          // matches what index.html's home feed already does.
+          const withDistance = snap.docs.map((doc) => {
             const data = doc.data();
+            let dKm = Number.POSITIVE_INFINITY;
+            if (
+              data.location &&
+              typeof data.location.latitude === "number" &&
+              typeof data.location.longitude === "number"
+            ) {
+              dKm = haversineDistance(
+                userLat,
+                userLng,
+                data.location.latitude,
+                data.location.longitude
+              );
+            }
+            return { data, dKm };
+          });
+          withDistance.sort((a, b) => a.dKm - b.dKm);
+
+          withDistance.forEach(({ data }) => {
             const distanceText = formatDistance(
               userLat,
               userLng,

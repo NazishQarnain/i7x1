@@ -290,12 +290,14 @@ button.full-width {
   font-size: 16px;
   font-weight: 600;
   color: #111827;
+  overflow-wrap: break-word;
 }
 
 .news-card p {
   margin: 0;
   font-size: 13px;
   color: #4b5563;
+  overflow-wrap: break-word;
 }
 
 .news-card .news-meta-small {
@@ -366,6 +368,7 @@ button.full-width {
   line-height: 1.3;
   font-weight: 700;
   color: #111827;
+  overflow-wrap: break-word;
 }
 
 #newsMeta {
@@ -383,6 +386,7 @@ button.full-width {
 
 #newsBody {
   white-space: pre-wrap;
+  overflow-wrap: break-word;
   font-size: 15px;
   line-height: 1.7;
   color: #111827;

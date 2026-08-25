@@ -107,6 +107,12 @@
           if (metaEl) metaEl.textContent = meta;
           if (bodyEl) bodyEl.textContent = content;
 
+          // Enhancement: the browser tab always showed the generic
+          // "Nearby News - Details" title, even after the actual post
+          // loaded — made it hard to tell tabs apart when multiple
+          // posts were open.
+          document.title = title + " - Nearby News";
+
           if (data.imageUrl && imgEl) {
             // Bug fix: a dead/expired ImgBB link used to show a broken
             // image icon on the detail page; hide it instead.
@@ -121,7 +127,8 @@
             actionsEl &&
             data.location &&
             typeof data.location.latitude === "number" &&
-            typeof data.location.longitude === "number"
+            typeof data.location.longitude === "number" &&
+            !(data.location.latitude === 0 && data.location.longitude === 0)
           ) {
             const lat = data.location.latitude;
             const lng = data.location.longitude;
