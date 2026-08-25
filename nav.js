@@ -25,6 +25,26 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     backdrop.addEventListener("click", closeMenu);
+
+    // Enhancement: Escape key closes the menu, matching what people
+    // expect from any overlay/drawer.
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeMenu();
+    });
+  }
+
+  // Enhancement: highlight whichever nav link matches the current page.
+  // Before this, all six links looked identical no matter where you
+  // were, so the menu gave no "you are here" feedback.
+  if (sideMenu) {
+    const currentPage = window.location.pathname.split("/").pop() || "index.html";
+    sideMenu.querySelectorAll("a").forEach((link) => {
+      const linkPage = link.getAttribute("href");
+      if (linkPage === currentPage) {
+        link.classList.add("active");
+        link.setAttribute("aria-current", "page");
+      }
+    });
   }
 
   // --- THEME TOGGLE ---
@@ -35,6 +55,22 @@ document.addEventListener("DOMContentLoaded", () => {
       document.body.classList.add("dark");
     } else {
       document.body.classList.remove("dark");
+    }
+    // Bug fix: the toggle button showed the same 🌓 icon no matter what
+    // state you were in — no feedback on what clicking it would do.
+    // Now it shows the icon for the theme you'd switch TO.
+    if (themeBtn) {
+      themeBtn.textContent = theme === "dark" ? "☀️" : "🌙";
+      themeBtn.setAttribute(
+        "aria-label",
+        theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+      );
+    }
+    // Enhancement: keeps the mobile browser's address-bar/status-bar
+    // color in sync with the theme instead of staying one fixed color.
+    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+    if (themeColorMeta) {
+      themeColorMeta.setAttribute("content", theme === "dark" ? "#020617" : "#1e293b");
     }
   }
 

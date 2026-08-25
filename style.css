@@ -9,6 +9,15 @@ body {
     sans-serif;
   background: #f4f4f7;
   color: #111827;
+  color-scheme: light;
+}
+
+/* Enhancement: without this, native browser UI (date-picker calendar
+   icon on <input type="date">, scrollbars) stayed light-themed even
+   when the site's dark mode was on — this tells the browser to render
+   its own controls dark too. */
+body.dark {
+  color-scheme: dark;
 }
 
 /* TOP NAVBAR */
@@ -79,6 +88,14 @@ body {
 
 .side-menu a:hover {
   background: #1f2937;
+}
+
+/* Enhancement: shows which page you're currently on inside the menu */
+.side-menu a.active {
+  background: #1e293b;
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: inset 3px 0 0 #2563eb;
 }
 
 .side-menu.open {
@@ -477,6 +494,11 @@ body.dark .side-menu a:hover {
   background: #111827;
 }
 
+body.dark .side-menu a.active {
+  background: #111827;
+  box-shadow: inset 3px 0 0 #60a5fa;
+}
+
 body.dark .panel,
 body.dark .news-card,
 body.dark .section-card {
@@ -565,6 +587,23 @@ body.dark .logout-btn {
 
 body.dark .logout-btn:hover {
   background: #991b1b;
+}
+
+/* Bug fix: these two elements had no dark-mode override, so they stayed
+   bright/light-colored even with dark mode on — a jarring light box in
+   an otherwise dark UI. */
+body.dark .admin-badge {
+  background: #14532d;
+  color: #bbf7d0;
+}
+
+body.dark .back-btn {
+  background: #1f2937;
+  color: #e5e7eb;
+}
+
+body.dark .back-btn:hover {
+  background: #374151;
 }
 
 /* Admin page styles */
@@ -686,6 +725,30 @@ body.dark .logout-btn:hover {
   background: #fee2e2;
 }
 
+/* Bug fix: account.html's "Delete" button used class .danger-btn but it
+   was never styled — it looked identical to a normal gray button, giving
+   no visual warning before a destructive action. */
+.small-btn.danger-btn {
+  background: #fef2f2;
+  border-color: #fca5a5;
+  color: #b91c1c;
+}
+
+.small-btn.danger-btn:hover {
+  background: #fee2e2;
+  border-color: #f87171;
+}
+
+body.dark .small-btn.danger-btn {
+  background: #7f1d1d;
+  border-color: #b91c1c;
+  color: #fee2e2;
+}
+
+body.dark .small-btn.danger-btn:hover {
+  background: #991b1b;
+}
+
 .readonly-input {
   width: 100%;
   border-radius: 999px;
@@ -699,7 +762,28 @@ body.dark .logout-btn:hover {
 
 .readonly-input:focus {
   outline: none;
-  border-color: #d1d5db;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+}
+
+/* Accessibility fix: nothing in the original CSS gave keyboard users a
+   visible focus indicator on buttons/links (mouse users never noticed,
+   but Tab-only navigation had no way to see which control was focused).
+   :focus-visible only shows this ring for keyboard focus, not mouse
+   clicks, so it doesn't add visual noise for pointer users. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+body.dark a:focus-visible,
+body.dark button:focus-visible,
+body.dark input:focus-visible,
+body.dark textarea:focus-visible {
+  outline-color: #60a5fa;
 }
 
 .info-row {
