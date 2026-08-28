@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- App version: 1.6.0 — see CHANGELOG.md for history -->
+<!-- App version: 1.6.1 — see CHANGELOG.md for history -->
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -321,10 +321,19 @@
           const distanceText =
             distanceKm != null ? distanceKm.toFixed(1) + " km" : "-";
 
+          // Bug fix: "..." used to be appended unconditionally, even
+          // when the content was shorter than the 120-char slice —
+          // making short posts look truncated when they weren't.
+          const rawContent = data.content || "";
+          const contentPreview =
+            rawContent.length > 120
+              ? rawContent.slice(0, 120).trimEnd() + "..."
+              : rawContent;
+
           rowsHtml += `
             <tr>
               <td>${escapeHtml(data.title || "")}</td>
-              <td>${escapeHtml((data.content || "").slice(0, 120))}...</td>
+              <td>${escapeHtml(contentPreview)}</td>
               <td>${escapeHtml(data.userId || "")}</td>
               <td>${escapeHtml(locationText)}</td>
               <td>${distanceText}</td>
@@ -500,11 +509,17 @@
           const docSnap = await db.collection("users").doc(user.uid).get();
           const data = docSnap.exists ? docSnap.data() : null;
 
-          const hasAdminRole =
-            data &&
-            (data.role === "admin" ||
-              data.isAdmin === true ||
-              data.is_admin === true);
+          // Bug fix: this used to also accept isAdmin===true / is_admin===true
+          // as alternate admin fields — but firestore.rules only recognizes
+          // role === "admin". That mismatch meant an account using one of
+          // the old field names could see this whole panel (client check
+          // passed) while every actual write (delete, import) silently
+          // failed with a permission-denied error from Firestore (server
+          // check failed). Checking the same single field here as the
+          // rules do keeps the UI and the actual permissions in sync — if
+          // your account used isAdmin/is_admin before, update it to
+          // role: "admin" in the users/{uid} document.
+          const hasAdminRole = data && data.role === "admin";
 
           if (!hasAdminRole) {
             isAdmin = false;

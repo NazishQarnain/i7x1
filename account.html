@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- App version: 1.6.0 — see CHANGELOG.md for history -->
+<!-- App version: 1.6.1 — see CHANGELOG.md for history -->
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -145,7 +145,10 @@
             btn.addEventListener("click", (e) => {
               e.stopPropagation();
               const id = btn.getAttribute("data-open");
-              window.open("news.html?id=" + id, "_blank");
+              // Consistency fix: every other place in the app that builds
+              // a news.html link (map.html, index.html cards) URL-encodes
+              // the post id first; this one didn't.
+              window.open("news.html?id=" + encodeURIComponent(id), "_blank");
             });
           });
 

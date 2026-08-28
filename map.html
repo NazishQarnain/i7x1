@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- App version: 1.6.0 — see CHANGELOG.md for history -->
+<!-- App version: 1.6.1 — see CHANGELOG.md for history -->
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -239,10 +239,10 @@
             .limit(100)
             .get();
 
-          // Clear existing pins/state before repopulating — loadMapPosts()
-          // is also called periodically while Drive Mode is active to pick
-          // up newly-posted hazards, so without this it would pile up
-          // duplicate markers on every refresh.
+          // Clear existing pins/state before repopulating — defensive
+          // guard in case this ever runs more than once (e.g. a future
+          // manual refresh button). Drive Mode's own periodic refresh no
+          // longer calls this function — see refreshDriveHazards() below.
           markerCluster.clearLayers();
           allPosts = [];
 
@@ -280,6 +280,22 @@
       let lastDrivePos = null; // { lat, lng } from the previous GPS fix
       let alertedHazards = {}; // hazardId -> Set of km-thresholds already alerted
       let driveMapFollowing = true; // whether the map auto-centers on each GPS fix
+
+      // Bug fix: Leaflet's "zoomstart" event fires for BOTH user zoom
+      // gestures AND our own programmatic map.setView() calls (e.g. the
+      // auto-follow recenter below). Without this guard, every
+      // auto-follow update immediately looked like "the user panned
+      // away", instantly disabling follow mode and showing the Recenter
+      // button right as Drive Mode started. This flag lets the
+      // drag/zoom listener tell our own moves apart from the user's.
+      let suppressFollowCancel = false;
+      function driveSetView(lat, lng, zoom) {
+        suppressFollowCancel = true;
+        map.setView([lat, lng], zoom);
+        setTimeout(() => {
+          suppressFollowCancel = false;
+        }, 0);
+      }
 
       // Optimization: Drive Mode used to re-run loadMapPosts() (all 100
       // latest posts, including plain news) every 60s and clear+rebuild
@@ -482,7 +498,7 @@
         // manually drags/zooms, at which point a "Recenter" button
         // appears instead of fighting their input.
         if (driveMapFollowing) {
-          map.setView([latitude, longitude], Math.max(map.getZoom(), 14));
+          driveSetView(latitude, longitude, Math.max(map.getZoom(), 14));
         }
 
         // Prefer the GPS's own heading (only reliable while actually
@@ -590,6 +606,7 @@
       // Recenter button: reappears once the user pans/zooms away from
       // their live position during Drive Mode, and snaps back on tap.
       map.on("dragstart zoomstart", () => {
+        if (suppressFollowCancel) return; // our own programmatic move, not the user
         if (driveWatchId == null) return; // only relevant while driving
         if (driveMapFollowing) {
           driveMapFollowing = false;
@@ -602,8 +619,9 @@
           driveMapFollowing = true;
           recenterBtn.style.display = "none";
           if (lastDrivePos) {
-            map.setView(
-              [lastDrivePos.lat, lastDrivePos.lng],
+            driveSetView(
+              lastDrivePos.lat,
+              lastDrivePos.lng,
               Math.max(map.getZoom(), 14)
             );
           }

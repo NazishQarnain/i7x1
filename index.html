@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- App version: 1.6.0 — see CHANGELOG.md for history -->
+<!-- App version: 1.6.1 — see CHANGELOG.md for history -->
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -177,7 +177,9 @@
         const card = document.createElement("div");
         card.className = "news-card";
         card.addEventListener("click", () => {
-          window.location.href = `news.html?id=${id}`;
+          // Consistency fix: URL-encode the id like map.html already
+          // does, instead of interpolating it raw into the URL.
+          window.location.href = `news.html?id=${encodeURIComponent(id)}`;
         });
 
         const title = data.title || "Untitled News";

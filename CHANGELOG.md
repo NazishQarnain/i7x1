@@ -4,6 +4,30 @@ All notable changes to i7x — Nearby News & Alert System are recorded here,
 newest first. Current version is also shown in the app itself (open the
 side menu — bottom of the list).
 
+## v1.6.1 — Bug fix pass 3
+
+- Fixed: the Drive Mode "Recenter" feature broke itself — Leaflet's
+  `zoomstart` event fires for both user zoom gestures AND our own
+  programmatic `map.setView()` calls (the auto-follow recenter). Without
+  telling those apart, every auto-follow update looked like "the user
+  panned away", instantly disabling follow mode and showing the Recenter
+  button right as Drive Mode started.
+- Fixed: admin panel's content column always appended "..." even to
+  short posts that weren't actually truncated, making them look cut off
+  when they weren't.
+- Fixed: the admin-access check accepted three different field names
+  (`role`, `isAdmin`, `is_admin`), but firestore.rules (v1.2.0) only
+  ever recognized `role === "admin"`. An account using one of the old
+  field names could see the whole admin panel (client check passed)
+  while every actual action — delete, import — silently failed with a
+  permission-denied error from Firestore. Now both checks match exactly.
+- Fixed: two places building a `news.html?id=...` link (the home feed
+  card click, and "Open" in Account → My Posts) didn't URL-encode the
+  post id, unlike the rest of the app. Firestore auto-IDs are safe in
+  practice, but this closes the inconsistency.
+- Cleaned up a stale code comment left over from the v1.6.0 refactor
+  that no longer matched what the code actually does.
+
 ## v1.6.0 — Drive Mode optimizations
 
 - Fixed: the map force-recentered on every single GPS update while
