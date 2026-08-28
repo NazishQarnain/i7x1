@@ -4,6 +4,23 @@ All notable changes to i7x — Nearby News & Alert System are recorded here,
 newest first. Current version is also shown in the app itself (open the
 side menu — bottom of the list).
 
+## v1.6.0 — Drive Mode optimizations
+
+- Fixed: the map force-recentered on every single GPS update while
+  Drive Mode was on, so panning or zooming to look at something got
+  yanked back within seconds. Now it only auto-follows until you
+  manually move the map, at which point a "🎯 Recenter" button appears.
+- Optimized: Drive Mode's 60-second background refresh used to re-fetch
+  all 100 latest posts (including plain news, not just hazards) and
+  clear+redraw every pin on the map — wasted Firestore reads and caused
+  a visible flicker across the whole map. It now queries only
+  hazard-tagged posts and updates just the hazard panel, leaving the
+  visible map pins alone.
+- Added: live speed (km/h) shown in the Drive Mode panel when the GPS
+  provides it.
+- Optimized: marker cluster now uses `chunkedLoading` so adding 100+
+  pins doesn't block the map for a moment.
+
 ## v1.5.0 — Drive Mode
 
 - Added a "Post Type" selector when creating a post: General News / Road

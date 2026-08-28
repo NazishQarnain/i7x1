@@ -1,5 +1,5 @@
 /* BASIC RESET */
-/* App version: 1.5.0 — see CHANGELOG.md for history */
+/* App version: 1.6.0 — see CHANGELOG.md for history */
 * {
   box-sizing: border-box;
 }
@@ -504,6 +504,15 @@ button.full-width {
 
 .drive-mode-btn.driving:hover {
   background: #b91c1c;
+}
+
+.recenter-btn {
+  bottom: 68px;
+  background: #2563eb;
+}
+
+.recenter-btn:hover {
+  background: #1d4ed8;
 }
 
 .drive-hazard-panel {
