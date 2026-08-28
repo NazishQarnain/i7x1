@@ -1,4 +1,5 @@
 /* BASIC RESET */
+/* App version: 1.5.0 — see CHANGELOG.md for history */
 * {
   box-sizing: border-box;
 }
@@ -98,6 +99,15 @@ body.dark {
   box-shadow: inset 3px 0 0 #2563eb;
 }
 
+/* Version number shown at the bottom of the side menu (see CHANGELOG.md) */
+.side-menu-version {
+  margin-top: auto;
+  padding: 8px;
+  font-size: 11px;
+  color: #6b7280;
+  text-align: center;
+}
+
 .side-menu.open {
   left: 0;
 }
@@ -164,6 +174,7 @@ input[type="text"],
 input[type="email"],
 input[type="password"],
 input[type="file"],
+select,
 textarea {
   width: 100%;
   margin: 6px 0;
@@ -171,6 +182,9 @@ textarea {
   border-radius: 6px;
   border: 1px solid #d1d5db;
   font-size: 14px;
+  background: #fff;
+  color: #111827;
+  font-family: inherit;
 }
 
 textarea {
@@ -436,6 +450,142 @@ button.full-width {
   font-size: 12px;
 }
 
+/* HAZARD BADGES (on news cards / list items / detail page) */
+
+.hazard-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+/* HAZARD MAP MARKERS (custom Leaflet divIcon) */
+
+.hazard-marker-inner {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+/* DRIVE MODE */
+
+.drive-mode-btn {
+  position: absolute;
+  z-index: 500;
+  bottom: 12px;
+  right: 12px;
+  border-radius: 999px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  background: #16a34a;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.drive-mode-btn:hover {
+  background: #15803d;
+}
+
+.drive-mode-btn.driving {
+  background: #dc2626;
+}
+
+.drive-mode-btn.driving:hover {
+  background: #b91c1c;
+}
+
+.drive-hazard-panel {
+  position: absolute;
+  z-index: 500;
+  top: 80px;
+  left: 12px;
+  right: 12px;
+  max-width: 360px;
+  background: rgba(15, 23, 42, 0.92);
+  color: #f9fafb;
+  border-radius: 10px;
+  padding: 10px 12px;
+  max-height: 55vh;
+  overflow-y: auto;
+}
+
+.drive-hazard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+.drive-hazard-sub {
+  font-size: 11px;
+  color: #cbd5e1;
+  margin: 0 0 8px;
+}
+
+.drive-hazard-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.06);
+  margin-bottom: 4px;
+}
+
+.drive-hazard-row:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.drive-hazard-dist {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.hazard-toast {
+  position: fixed;
+  z-index: 900;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #b91c1c;
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  animation: hazard-toast-in 0.2s ease-out;
+  max-width: 90vw;
+  text-align: center;
+}
+
+@keyframes hazard-toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
 /* RESPONSIVE */
 
 @media (max-width: 600px) {
@@ -454,6 +604,16 @@ button.full-width {
 
   #newsTitle {
     font-size: 19px;
+  }
+
+  .drive-hazard-panel {
+    max-width: none;
+    max-height: 45vh;
+  }
+
+  .drive-mode-btn {
+    padding: 9px 14px;
+    font-size: 13px;
   }
 }
 
@@ -522,6 +682,7 @@ body.dark input[type="text"],
 body.dark input[type="email"],
 body.dark input[type="password"],
 body.dark input[type="file"],
+body.dark select,
 body.dark textarea {
   background: #020617;
   color: #e5e7eb;

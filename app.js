@@ -1,4 +1,5 @@
 // Nearby News & Alert System - Optimized app.js with image compression + reverse geocoding
+// App version: 1.5.0 — see CHANGELOG.md for history
 
 document.addEventListener("DOMContentLoaded", () => {
   const $ = (id) => document.getElementById(id);
@@ -11,6 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const userInfo = $("userInfo");
   const titleInput = $("titleInput");
   const contentInput = $("contentInput");
+  const postTypeInput = $("postTypeInput");
   const imageInput = $("imageInput");
   const postBtn = $("postBtn");
   const loadNearbyBtn = $("loadNearbyBtn");
@@ -18,6 +20,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let currentUser = null;
   let db = null;
+
+  // Shared metadata for road-hazard post types (used here and mirrored
+  // in index.html / map.html / news.html since this is a plain static
+  // site with no shared JS module system).
+  const HAZARD_TYPES = {
+    road_damage: { label: "Road Damage", emoji: "🚧", color: "#f97316" },
+    bridge_damage: { label: "Bridge Damage/Closed", emoji: "🌉", color: "#dc2626" },
+    accident: { label: "Accident", emoji: "🚗", color: "#b91c1c" },
+    flooding: { label: "Flooding", emoji: "🌊", color: "#0284c7" },
+    other_hazard: { label: "Road Hazard", emoji: "⚠️", color: "#ca8a04" }
+  };
 
   // ---------- FIREBASE INIT ----------
   function initFirebase() {
@@ -104,6 +117,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function clearPostForm() {
     if (titleInput) titleInput.value = "";
     if (contentInput) contentInput.value = "";
+    if (postTypeInput) postTypeInput.value = "";
     if (imageInput) imageInput.value = "";
   }
 
@@ -308,6 +322,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const title = getInputValue(titleInput);
     const content = getInputValue(contentInput);
+    const hazardType = postTypeInput ? postTypeInput.value || null : null;
     const file = imageInput?.files?.[0] || null;
 
     if (!title || !content) {
@@ -358,7 +373,8 @@ document.addEventListener("DOMContentLoaded", () => {
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
             location: new firebase.firestore.GeoPoint(lat, lng),
             imageUrl: imageUrl || null,
-            address: address || null
+            address: address || null,
+            hazardType: hazardType || null
           });
 
           showAlert("Post created.");
@@ -391,11 +407,23 @@ document.addEventListener("DOMContentLoaded", () => {
         ? content.slice(0, 120).trimEnd() + "..."
         : content;
 
+    // Enhancement: road-hazard posts get a colored badge so they stand
+    // out from regular news in the nearby list.
+    const hazardMeta = data.hazardType ? HAZARD_TYPES[data.hazardType] : null;
+    if (hazardMeta) {
+      const badge = document.createElement("span");
+      badge.className = "hazard-badge";
+      badge.style.background = hazardMeta.color;
+      badge.textContent = `${hazardMeta.emoji} ${hazardMeta.label}`;
+      li.appendChild(badge);
+      li.appendChild(document.createElement("br"));
+    }
+
     let line = `${title} - ${fullContent}`;
     if (distanceText) line += ` (${distanceText})`;
     if (address) line += ` • ${address}`;
 
-    li.textContent = line;
+    li.appendChild(document.createTextNode(line));
 
     if (data.imageUrl) {
       const img = document.createElement("img");

@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- App version: 1.5.0 — see CHANGELOG.md for history -->
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -27,6 +28,7 @@
         <a href="app.html">Create / Nearby News</a>
         <a href="map.html">Live Map</a>
         <a href="admin.html">Admin</a>
+        <div class="side-menu-version">v<span id="appVersion"></span></div>
       </nav>
       <div id="backdrop" class="backdrop"></div>
     </header>
@@ -34,6 +36,7 @@
     <main class="news-detail-container">
       <button id="backBtn" class="back-btn">← Back</button>
 
+      <div id="hazardBanner" style="display: none;"></div>
       <h2 id="newsTitle">Loading...</h2>
       <p id="newsMeta" class="news-meta"></p>
       <img
@@ -57,6 +60,17 @@
 
     <script>
       const db = firebase.firestore();
+
+      // Shared road-hazard metadata (mirrored in app.js / index.html /
+      // map.html since this is a plain static site with no shared JS
+      // module system).
+      const HAZARD_TYPES = {
+        road_damage: { label: "Road Damage", emoji: "🚧", color: "#f97316" },
+        bridge_damage: { label: "Bridge Damage/Closed", emoji: "🌉", color: "#dc2626" },
+        accident: { label: "Accident", emoji: "🚗", color: "#b91c1c" },
+        flooding: { label: "Flooding", emoji: "🌊", color: "#0284c7" },
+        other_hazard: { label: "Road Hazard", emoji: "⚠️", color: "#ca8a04" }
+      };
 
       function getQueryParam(name) {
         const params = new URLSearchParams(window.location.search);
@@ -102,6 +116,23 @@
           const title = data.title || "Untitled News";
           const content = data.content || "";
           const meta = formatMeta(data);
+
+          // Enhancement: a prominent colored banner at the top of the
+          // detail page for hazard posts, so it's unmissable when someone
+          // opens the post directly (e.g. from a shared link).
+          const hazardBanner = document.getElementById("hazardBanner");
+          const hazardMeta = data.hazardType ? HAZARD_TYPES[data.hazardType] : null;
+          if (hazardBanner && hazardMeta) {
+            hazardBanner.style.display = "block";
+            hazardBanner.style.background = hazardMeta.color;
+            hazardBanner.style.color = "#fff";
+            hazardBanner.style.padding = "8px 14px";
+            hazardBanner.style.borderRadius = "8px";
+            hazardBanner.style.fontWeight = "700";
+            hazardBanner.style.marginBottom = "10px";
+            hazardBanner.style.fontSize = "14px";
+            hazardBanner.textContent = `${hazardMeta.emoji} ${hazardMeta.label}`;
+          }
 
           if (titleEl) titleEl.textContent = title;
           if (metaEl) metaEl.textContent = meta;

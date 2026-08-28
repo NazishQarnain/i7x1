@@ -1,8 +1,17 @@
+// App version — bump this + add an entry to CHANGELOG.md whenever a
+// meaningful set of changes ships, so it's always possible to tell which
+// version of the code is live just by opening the side menu.
+const APP_VERSION = "1.5.0";
+
 document.addEventListener("DOMContentLoaded", () => {
   const menuBtn = document.getElementById("menuToggle");
   const sideMenu = document.getElementById("sideMenu");
   const backdrop = document.getElementById("backdrop");
   const themeBtn = document.getElementById("themeToggle");
+
+  console.log("Nearby News app version:", APP_VERSION);
+  const versionEl = document.getElementById("appVersion");
+  if (versionEl) versionEl.textContent = "v" + APP_VERSION;
 
   // --- NAV MENU ---
   if (menuBtn && sideMenu && backdrop) {

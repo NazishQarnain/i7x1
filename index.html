@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- App version: 1.5.0 — see CHANGELOG.md for history -->
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -29,6 +30,7 @@
         <a href="app.html">Create / Nearby News</a>
         <a href="map.html">Live Map</a>
         <a href="admin.html">Admin</a>
+        <div class="side-menu-version">v<span id="appVersion"></span></div>
       </nav>
       <div id="backdrop" class="backdrop"></div>
     </header>
@@ -49,6 +51,16 @@
 
       // User location cache for distance
       let userLocation = null;
+
+      // Shared road-hazard metadata (mirrored in app.js / map.html / news.html
+      // since this is a plain static site without a shared JS module system).
+      const HAZARD_TYPES = {
+        road_damage: { label: "Road Damage", emoji: "🚧", color: "#f97316" },
+        bridge_damage: { label: "Bridge Damage/Closed", emoji: "🌉", color: "#dc2626" },
+        accident: { label: "Accident", emoji: "🚗", color: "#b91c1c" },
+        flooding: { label: "Flooding", emoji: "🌊", color: "#0284c7" },
+        other_hazard: { label: "Road Hazard", emoji: "⚠️", color: "#ca8a04" }
+      };
 
       // Country approx centers (same mapping as admin/index)
       const COUNTRY_COORDS = {
@@ -178,6 +190,20 @@
 
         // Build with DOM APIs (not innerHTML) so post content can never
         // execute as HTML/script — prevents stored XSS from user posts.
+
+        // Enhancement: road-hazard posts get a colored badge at the top
+        // of the card so they're immediately distinguishable from
+        // regular news while scanning the feed.
+        const hazardMeta = data.hazardType ? HAZARD_TYPES[data.hazardType] : null;
+        if (hazardMeta) {
+          const badge = document.createElement("span");
+          badge.className = "hazard-badge";
+          badge.style.background = hazardMeta.color;
+          badge.style.alignSelf = "flex-start";
+          badge.textContent = `${hazardMeta.emoji} ${hazardMeta.label}`;
+          card.appendChild(badge);
+        }
+
         const h3 = document.createElement("h3");
         h3.textContent = title;
         card.appendChild(h3);
